@@ -1,0 +1,213 @@
+{% extends './public/base.html' %}
+{% block section %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                 角色列表
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+                        <thead>
+                            <tr>
+                                <th>权限ID</th>
+                                <th>权限名称</th>
+                                <th>权限路由</th>
+                                <th>菜单是否显示</th>
+                                <th>当前状态</th>
+                                <th>注册时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in data %}
+                            <tr class="odd gradeX">
+                                <td>{{i.id}}</td>
+                                <td>{{i.name}}</td>
+                                <td>{{i.src}}</td>
+                                <td class="center">{{i.menu}}</td>
+                                <td class="center">{{i.status}}</td>
+                                <td class="center">{{(i.addtime)}}</td>
+                                <td>
+                                    <a href="javascript:;" onclick="add_child_menu('{{i.id}}','{{i.path}}')">添加子菜单</a>
+                                    <a href="javascript:;" onclick="edit({{i.id}})">更新</a>
+                                    <a href="javascript:;" onclick="del({{i.id}})">删除</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--编辑-->
+<div class="modal fade" tabindex="-1" role="dialog" id="user_edit_page" data-backdrop='static'>>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">编辑规则</h4>
+      </div>
+      <div class="modal-body">
+          <div class="form-group">
+            <label>规则名称</label>
+            <input class="form-control edit_rule_input_name" value="" />
+          </div>
+          <div class="form-group">
+            <label>规则路由</label>
+            <input class="form-control edit_rule_input_src" value="" />
+          </div>
+          <div class="form-group">
+                <label>状态</label>
+                <select class="form-control edit_rule_input_status"></select>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" data-dismiss="modal">取消</button>
+        <div class="btn btn-primary" onclick="submit_btn()">提交</div>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<div class="modal fade" tabindex="-1" role="dialog" id="user_del_page" data-backdrop='static'>>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">确定数据删除吗?</h4>
+      </div>
+      <div class="modal-body">
+          <p>确定删除数据吗?</p>
+      </div>
+      <div class="modal-footer">
+        <div class="btn btn-default" data-dismiss="modal" >取消</div>
+        <div  class="btn btn-primary" onclick="submit_del_btn()">确认</div>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!--添加子菜单-->
+<div class="modal fade" tabindex="-1" role="dialog" id="add_child_menu" data-backdrop='static'>>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">添加子菜单</h4>
+      </div>
+      <div class="modal-body">
+          <div class="form-group">
+            <label>规则名称</label>
+            <input class="form-control add_child_name" value=""  placeholder="请输入规则名称...."/>
+        </div>
+        <div class="form-group">
+            <label>规则路由</label>
+            <input class="form-control add_child_src" value=""  placeholder="请输入规则路由...."/>
+        </div>
+        <div class="form-group">
+            <label>是否菜单</label>
+            <select class="form-control add_child_menu">
+                <option value="1">是</option>
+                <option value="0" selected>否</option>
+            </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="btn btn-default" data-dismiss="modal" >取消</div>
+        <div  class="btn btn-primary" onclick="submit_add_child_btn()">确认</div>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<script>
+    //添加子菜单
+    function add_child_menu(code,path){
+        $('#add_child_menu').attr("code",code);
+        $('#add_child_menu').attr("path",path);
+        $('#add_child_menu').modal('show');
+    }
+    function submit_add_child_btn(){
+        var code = $('#add_child_menu').attr("code");
+        var path = $('#add_child_menu').attr("path");
+        var name = $.trim($('.add_child_name').val());
+        var src = $.trim($('.add_child_src').val());
+        var menu = $('.add_child_menu').find('option:selected').val();
+        var url = '/rule/insert'
+        $.post(url,{"pid":code,"path":path,"name":name,"src":src,"menu":menu},function(data){
+            if(data.code=='92000'){
+                location.reload();
+            }else{
+                $('#user_edit_page').find('div[class="modal-footer"]').find("div[class='btn btn-primary']").remove();
+                $('#user_edit_page').find('div[class="modal-body"]').html('<p>'+data.msg+'</p>');
+            }
+        },'json');
+    }
+
+    // 编辑
+    function edit(obj){
+        var url = '/rule/update'
+        $.get(url,{"code":obj},function(data){
+            if(data.code=='92000'){
+                var rule = data.data;
+                $('#user_edit_page').attr('code',rule.id);
+                $('.edit_rule_input_name').attr('value',rule.name);
+                $('.edit_rule_input_src').attr('value',rule.src);
+                var status_html = '';
+                if(rule.status==1){
+                    status_html = '<option value="0">禁用</option><option value="1" selected>启用</option>'
+                }else{
+                    status_html = '<option value="0" selected>禁用</option><option value="1">启用</option>'
+                }
+                $('.edit_rule_input_status').html(status_html);
+            }else{
+                $('#user_edit_page').find('div[class="modal-footer"]').find("div[class='btn btn-primary']").remove();
+                $('#user_edit_page').find('div[class="modal-body"]').html('<p>'+data.msg+'</p>');
+            }
+        },"json")
+        $('#user_edit_page').modal('show');
+    }
+    //编辑提交
+    function submit_btn(){
+        var code =  $('#user_edit_page').attr('code');
+        var name = $('.edit_rule_input_name').val();
+        var src = $('.edit_rule_input_src').val();
+        var status = $('.edit_rule_input_status').find('option:selected').val();
+        var url = '/rule/update';
+        $.post(url,{"status":status,"code":code,'name':name,'src':src},function (data) {
+            if(data.code=='92000'){
+                location.reload();
+            }else{
+                $('#user_edit_page').find('div[class="modal-footer"]').find("div[class='btn btn-primary']").remove();
+                $('#user_edit_page').find('div[class="modal-body"]').html('<p>'+data.msg+'</p>');
+                $('#user_edit_page').find('div[data-dismiss="modal"]').attr("onclick","refresh()")
+            }
+        },"json");
+    }
+
+    //删除
+    function del(obj){
+        $('#user_del_page').attr('code',obj);
+        $('#user_del_page').modal('show');
+    }
+    function submit_del_btn(){
+        var code = $('#user_del_page').attr('code');
+        var url = "/rule/del";
+        $.get(url,{"code":code},function(data){
+            if(data.code=='92000'){
+                location.reload();
+            }else{
+                $('#user_del_page').find('div[class="modal-body"]').html('<p>'+data.msg+'</p>');
+                $('#user_del_page').find('div[class="btn btn-primary"]').remove();
+                $('#user_del_page').find('div[data-dismiss="modal"]').attr("onclick","refresh()")
+            }
+        },"json")
+    }
+    //刷新
+    function refresh(){
+        location.reload();
+    }
+</script>
+{% endblock %}
+

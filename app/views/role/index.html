@@ -1,0 +1,150 @@
+{% extends './public/base.html' %}
+{% block section %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                 角色列表
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+                        <thead>
+                            <tr>
+                                <th>角色ID</th>
+                                <th>角色名</th>
+                                <th>角色状态</th>
+                                <th>注册时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in data %}
+                            <tr class="odd gradeX">
+                                <td>{{i.rid}}</td>
+                                <td>{{i.rname}}</td>
+                                <td class="center">{{i.status}}</td>
+                                <td class="center">{{(i.addtime)}}</td>
+                                <td>
+                                    <a href="javascript:;">授权</a>
+                                    <a href="javascript:;" onclick="edit({{i.rid}})">更新</a>
+                                    <a href="javascript:;" onclick="del({{i.rid}})">删除</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--编辑-->
+<div class="modal fade" tabindex="-1" role="dialog" id="user_edit_page">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">编辑用户</h4>
+      </div>
+      <div class="modal-body">
+        <!--<p>暂无信息...</p>-->
+          <div class="form-group">
+            <label>用户姓名</label>
+            <input class="form-control name" value="" disabled/>
+          </div>
+          <div class="form-group">
+                <label>状态</label>
+                <select class="form-control status">
+                    <option value="0">锁定</option>
+                </select>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" data-dismiss="modal">取消</button>
+        <div class="btn btn-primary" onclick="submit_btn()">提交</div>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<div class="modal fade" tabindex="-1" role="dialog" id="user_del_page">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">确定数据删除吗?</h4>
+      </div>
+      <div class="modal-body">
+        <p>确定数据删除吗？</p>
+      </div>
+      <div class="modal-footer">
+        <div class="btn btn-default" data-dismiss="modal" >取消</div>
+        <div  class="btn btn-primary" onclick="submit_del_btn()">确认</div>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<script>
+    // 编辑
+    function edit(obj){
+        var url = '/role/update'
+        $.get(url,{"code":obj},function(data){
+            if(data.code=='91000'){
+                var role = data.data;
+                $('#user_edit_page').attr('code',role.id);
+                $('.name').attr('value',role.name);
+                var status_html = '';
+                if(role.status==1){
+                    status_html = '<option value="0">锁定</option><option value="1" selected>启用</option>'
+                }else{
+                    status_html = '<option value="0" selected>锁定</option><option value="1">启用</option>'
+                }
+                $('.status').html(status_html);
+            }else{
+                $('#user_edit_page').find('div[class="modal-footer"]').find("div[class='btn btn-primary']").remove();
+                $('#user_edit_page').find('div[class="modal-body"]').html('<p>'+data.msg+'</p>');
+            }
+        },"json")
+        $('#user_edit_page').modal('show');
+    }
+    //编辑提交
+    function submit_btn(){
+        var code =  $('#user_edit_page').attr('code');
+        var status = $('.status').find('option:selected').val();
+        var url = '/role/update';
+        $.post(url,{"status":status,"code":code},function (data) {
+            if(data.code=='91000'){
+                location.reload();
+            }else{
+                $('#user_edit_page').find('div[class="modal-footer"]').find("div[class='btn btn-primary']").remove();
+                $('#user_edit_page').find('div[class="modal-body"]').html('<p>'+data.msg+'</p>');
+                $('#user_edit_page').find('div[data-dismiss="modal"]').attr("onclick","refresh()")
+            }
+        },"json");
+    }
+
+    //删除
+    function del(obj){
+        $('#user_del_page').attr('code',obj);
+        $('#user_del_page').modal('show');
+    }
+    function submit_del_btn(){
+        var code = $('#user_del_page').attr('code');
+        var url = "/role/del";
+        $.get(url,{"code":code},function(data){
+            if(data.code=='91000'){
+                location.reload();
+            }else{
+                $('#user_del_page').find('div[class="modal-body"]').html('<p>'+data.msg+'</p>');
+                $('#user_del_page').find('div[class="btn btn-primary"]').remove();
+                $('#user_del_page').find('div[data-dismiss="modal"]').attr("onclick","refresh()")
+            }
+        },"json")
+    }
+    //刷新
+    function refresh(){
+        location.reload();
+    }
+</script>
+{% endblock %}
+

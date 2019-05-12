@@ -1,0 +1,75 @@
+{% extends './public/base.html' %}
+{% block section %}
+<div id="page-inner">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">添加管理员</div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-6 col-lg-offset-3">
+                        <form role="form">
+                            <div class="form-group">
+                                <label>姓名 <span style="color:red;">*</span></label>
+                                <input type="text" class="form-control name" value="" placeholder="请出入姓名...">
+                            </div>
+                            <div class="form-group">
+                                <label>密码 <span style="color:red;">*</span></label>
+                                <input type="password" class="form-control password" placeholder="请输入密码...">
+                            </div>
+                            <div class="form-group">
+                                <label>确认密码 <span style="color:red;">*</span></label>
+                                <input type="password" class="form-control repwd" placeholder="请确认密码...">
+                            </div>
+                            <div class="form-group">
+                                <label>权限 <span style="color:red;">*</span></label>
+                                <select class="form-control role">
+                                    {% for i in data %}
+                                    <option value="{{i.id}}">{{i.name}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>备注信息</label>
+                                <textarea class="form-control notes" rows="3" placeholder="请输入备注信息(非必填项)"></textarea>
+                            </div>
+                            <div class="btn btn-default" onclick="user_submit_btn()">提交</div>
+                            <button type="reset" class="btn btn-default">取消</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    //提交
+    function user_submit_btn(){
+        var name = $.trim($('.name').val());
+        if(!name){
+            alert('姓名不能为空');
+            return false;
+        }
+        var password = $.trim($('.password').val());
+        var repwd = $.trim($('.repwd').val());
+        if(password && password==repwd){
+        }else{
+            if(password){
+                alert('两次输入的密码不一致.');
+            }else{
+                alert('请输入密码..');
+            }
+            return false;
+        }
+        var role = $('.role').find('option:selected').val();
+        var notes = $('.notes').val();
+        var url = '/user/insert';
+        $.post(url,{'name':name,'password':password,'role':role,'notes':notes},function(data){
+            if(data.code=='90000'){
+                location.href='/user'
+            }else{
+                alert(data.msg);
+            }
+        },'json')
+    }
+</script>
+{% endblock %}
