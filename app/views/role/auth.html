@@ -1,0 +1,52 @@
+{% extends './public/base.html' %}
+{% block section %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                 角色授权
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover" id="dataTables-example">
+                        <thead>
+                            <tr>
+                                <th>权限ID</th>
+                                <th>权限名称</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in data %}
+                            <tr class="odd gradeX">
+                                <td>{{i.rid}}</td>
+                                <td>{{i.name}}</td>
+                                <td>
+                                    <input type="checkbox" name="auth" value="{{i.rid}}"/>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                     <div class="modal-footer">
+                        <div  class="btn btn-primary" onclick="submit_auth_btn()">确认</div>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+ function submit_auth_btn(){
+     var code = '{{code}}';
+     var auth = [];
+     $('input[type="checkbox"]:checked').each(function (data) {
+         auth.push($(this).val());
+     });
+     var url = '/role/auth';
+     $.post(url,{"code":code,"name":auth},function (data) {
+
+     });
+ }
+</script>
+{% endblock %}

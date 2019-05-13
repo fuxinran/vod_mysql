@@ -4,5 +4,5 @@ PORT = 10000
 DEBUG = True
 
 # 数据库配置
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:123456@localhost:3306/demo1?charset=utf8'
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@localhost:3306/demo1?charset=utf8'
 SQLALCHEMY_TRACK_MODIFICATIONS = True

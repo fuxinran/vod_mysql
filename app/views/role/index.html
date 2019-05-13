@@ -26,7 +26,7 @@
                                 <td class="center">{{i.status}}</td>
                                 <td class="center">{{(i.addtime)}}</td>
                                 <td>
-                                    <a href="javascript:;">授权</a>
+                                    <a href="/role/auth?code={{i.rid}}">授权</a>
                                     <a href="javascript:;" onclick="edit({{i.rid}})">更新</a>
                                     <a href="javascript:;" onclick="del({{i.rid}})">删除</a>
                                 </td>

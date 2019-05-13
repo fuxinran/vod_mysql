@@ -68,3 +68,32 @@ def role_del():
     if not data:
         return ajaxReturn(StatusCode.A91001)
     return ajaxReturn(StatusCode.A91000)
+
+# 角色授权
+@web.route('/role/auth',methods=['GET','POST'])
+def role_auth():
+    if request.method == 'POST':
+        code = request.form.get('code',0)
+        sql = "delete from tbl_rule_role where roleid={}".format(code)
+        delete(sql)
+        auth = request.values.getlist('name[]')
+        if auth:
+            info = []
+            for i in auth:
+                info.append({'roleid':code,'ruleid':i})
+            sql = "insert into tbl_rule_role(`roleid`,`ruleid`)values(:roleid,:ruleid)"
+            data = insert(sql,info)
+            if not data:
+                return ajaxReturn(StatusCode.A91007)
+        return ajaxReturn(StatusCode.A91000)
+    code = request.args.get('code','0')
+    sql = "select rule.id,if(length(rule.path)>2,concat('└',repeat('─',(length(path)-2)),rule.name),rule.name) as name,r.roleid as roleid from tbl_rule as rule LEFT JOIN tbl_rule_role as r on r.ruleid = rule.id group by concat(rule.path,rule.id) asc;"
+    data = select(sql)
+    info = to_dict(['rid','name','roleid'],data)
+    print(info)
+    return render_template('role/auth.html',data=info,code=code)
+
+# # 获取所有权限
+# def get_all_rule():
+#     sql = "select * from "
+#     return ''
